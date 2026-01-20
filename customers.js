@@ -1,0 +1,2 @@
+// customers Data
+const allCustomers = [];
