@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店铺后台管理</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        h1 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        /* 顶部工具栏 */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"], input[type="number"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .search-box { flex: 1; }
+        
+        /* 表格样式 */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f8f8; font-weight: bold; }
+        tr:hover { background: #f9f9f9; }
+        
+        /* 状态标签 */
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+        .status-active { background: #e6fffa; color: #00796b; border: 1px solid #b2f5ea; }
+        .status-inactive { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+
+        /* 底部操作区 */
+        .action-area { background: #333; color: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        textarea { width: 100%; height: 150px; background: #1a1a1a; color: #00ff00; font-family: monospace; padding: 10px; border: none; margin-top: 10px; }
+        
+        .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-add { background: #3182ce; color: white; }
+        .btn-save { background: #38a169; color: white; width: 100%; font-size: 1.1rem; }
+        .btn-copy { background: #eee; margin-top: 5px; }
+
+        /* 添加产品表单 */
+        .add-form { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; padding: 15px; background: #ebf8ff; border-radius: 8px; margin-bottom: 20px; align-items: end; }
+        .form-group label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #666; }
+        .form-group input { width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 产品库管理 (Product Sheet)</h1>
+
+    <div class="add-form">
+        <div class="form-group">
+            <label>ID (唯一编号)</label>
+            <input type="text" id="newId" placeholder="例如: cup-005">
+        </div>
+        <div class="form-group">
+            <label>产品名称</label>
+            <input type="text" id="newName" placeholder="产品名字">
+        </div>
+        <div class="form-group">
+            <label>价格 ($)</label>
+            <input type="number" id="newPrice" placeholder="25.00">
+        </div>
+        <div class="form-group">
+            <label>图片路径</label>
+            <input type="text" id="newImg" value="product_images/" placeholder="图片文件名">
+        </div>
+        <button class="btn btn-add" onclick="addNewProduct()">+ 添加</button>
+    </div>
+
+    <div class="toolbar">
+        <input type="text" class="search-box" id="searchInput" placeholder="🔍 搜索产品名称或ID..." onkeyup="renderTable()">
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>状态</th>
+                <th>ID</th>
+                <th>图片</th>
+                <th>名称</th>
+                <th>价格</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+
+    <div class="action-area">
+        <h3>💾 保存更改</h3>
+        <p>1. 在上方修改完后，点击“生成代码”。<br>2. 复制代码，粘贴覆盖到 <strong>products.js</strong> 文件中。</p>
+        <button class="btn btn-save" onclick="generateCode()">🔄 生成最新代码</button>
+        <textarea id="outputCode" readonly onclick="this.select()">暂时没有更改...</textarea>
+    </div>
+</div>
+
+<script src="products.js"></script>
+
+<script>
+    // 页面加载时，使用 products.js 里的 allProducts
+    // 如果 products.js 里没有 allProducts (旧版本)，就用空数组
+    let currentData = (typeof allProducts !== 'undefined') ? allProducts : [];
+
+    // 渲染表格
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        tbody.innerHTML = '';
+
+        currentData.forEach((item, index) => {
+            // 搜索过滤
+            if (!item.name.toLowerCase().includes(searchTerm) && !item.id.toLowerCase().includes(searchTerm)) {
+                return;
+            }
+
+            const tr = document.createElement('tr');
+            
+            // 状态样式
+            const statusClass = item.active ? 'status-active' : 'status-inactive';
+            const statusText = item.active ? '上架中 (Active)' : '已下架 (Inactive)';
+
+            tr.innerHTML = `
+                <td><span class="status-badge ${statusClass}" onclick="toggleStatus(${index})">${statusText}</span></td>
+                <td>${item.id}</td>
+                <td><img src="${item.image}" style="height:40px; border-radius:4px;"></td>
+                <td contenteditable="true" onblur="updateName(${index}, this.innerText)">${item.name}</td>
+                <td contenteditable="true" onblur="updatePrice(${index}, this.innerText)">$${item.price}</td>
+                <td><button onclick="deleteProduct(${index})" style="color:red; border:none; background:none; cursor:pointer;">删除</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 1. 切换上架/下架
+    function toggleStatus(index) {
+        currentData[index].active = !currentData[index].active;
+        renderTable();
+    }
+
+    // 2. 添加新产品
+    function addNewProduct() {
+        const id = document.getElementById('newId').value;
+        const name = document.getElementById('newName').value;
+        const price = parseFloat(document.getElementById('newPrice').value);
+        const img = document.getElementById('newImg').value;
+
+        if(!id || !name || !price) return alert("请填写完整信息");
+
+        currentData.push({
+            id: id,
+            name: name,
+            price: price,
+            image: img,
+            active: true // 默认上架
+        });
+
+        // 清空输入框
+        document.getElementById('newId').value = '';
+        document.getElementById('newName').value = '';
+        document.getElementById('newPrice').value = '';
+        
+        renderTable();
+        alert("添加成功！记得点击底部的生成代码。");
+    }
+
+    // 3. 删除产品
+    function deleteProduct(index) {
+        if(confirm("确定要删除这个产品吗？建议使用‘下架’代替删除。")) {
+            currentData.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    // 4. 直接在表格里修改名字和价格
+    function updateName(index, val) { currentData[index].name = val; }
+    function updatePrice(index, val) { currentData[index].price = parseFloat(val.replace('$','')); }
+
+    // 5. 核心：生成代码
+    function generateCode() {
+        const jsonString = JSON.stringify(currentData, null, 4);
+        const jsCode = `// 这是你的“总数据库”，包含所有（上架和下架）的产品\n// 以后请把 admin.html 生成的代码粘贴覆盖这里\nconst allProducts = ${jsonString};\n\n// 这一行代码只“过滤”出 active: true 的产品给 index.html 使用\nconst products = allProducts.filter(p => p.active === true);`;
+        
+        document.getElementById('outputCode').value = jsCode;
+        document.getElementById('outputCode').select();
+        document.execCommand("copy"); // 尝试自动复制
+        alert("代码已生成并复制！\n请去 Cursor 打开 products.js 并粘贴覆盖。");
+    }
+
+    // 初始化
+    renderTable();
+</script>
+
+</body>
+</html>
