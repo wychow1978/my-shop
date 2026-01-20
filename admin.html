@@ -3,88 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>店铺后台 - 自动同步版</title>
+    <title>MyShop 超级后台</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f0f2f5; color: #333; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         
-        /* 配置区域 */
-        .config-box { background: #fff3cd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ffeeba; }
-        .config-box input { padding: 5px; margin-right: 10px; width: 200px; }
-        
-        /* 表格与表单样式 (保持不变) */
-        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
-        input[type="text"], input[type="number"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .search-box { flex: 1; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f8f8; font-weight: bold; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
-        .status-active { background: #e6fffa; color: #00796b; border: 1px solid #b2f5ea; }
-        .status-inactive { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+        /* 顶部配置区 */
+        .config-box { background: #fff8e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #ffe082; display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; }
+        .config-inputs input { border: 1px solid #ccc; padding: 4px; border-radius: 4px; width: 150px; }
 
-        .add-form { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; padding: 15px; background: #ebf8ff; border-radius: 8px; margin-bottom: 20px; align-items: end; }
-        .form-group label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #666; }
-        .form-group input { width: 100%; box-sizing: border-box; }
+        /* 标签页切换 (Tabs) */
+        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 20px; }
+        .tab-btn { padding: 15px 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; background: none; color: #888; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn.active { color: #3182ce; border-bottom: 3px solid #3182ce; }
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 表格样式 */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
+        input.search-box { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.95rem; }
+        th { background: #f7fafc; padding: 12px; text-align: left; border-bottom: 2px solid #edf2f7; color: #4a5568; }
+        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        tr:hover { background: #f9fafb; }
+
+        /* 按钮样式 */
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: #3182ce; color: white; }
+        .btn-success { background: #38a169; color: white; }
+        .btn-danger { color: #e53e3e; background: none; }
+        .btn-whatsapp { background: #25D366; color: white; text-decoration: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-save-cloud { width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 20px; }
         
-        .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; color: white; }
-        .btn-add { background: #3182ce; }
-        .btn-save { background: #2f855a; width: 100%; font-size: 1.2rem; }
-        .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+        /* 状态徽章 */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
+        .active-badge { background: #c6f6d5; color: #22543d; }
+        .inactive-badge { background: #fed7d7; color: #822727; }
+
+        /* 客户历史记录区域 */
+        .history-row { background: #fafafa; display: none; }
+        .history-box { padding: 15px; margin: 10px 20px; border: 1px dashed #cbd5e0; border-radius: 6px; font-size: 0.9rem; }
+        .history-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 5px 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🚀 店铺云后台 (GitHub 直连)</h1>
-
     <div class="config-box">
-        <h3>🔑 GitHub 设置 (首次使用请填写)</h3>
-        <div>
-            <label>用户名:</label> <input type="text" id="ghOwner" placeholder="例如: wychow1978">
-            <label>仓库名:</label> <input type="text" id="ghRepo" placeholder="例如: my-shop">
-            <label>Token:</label> <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx">
-            <button onclick="saveConfig()">保存配置</button>
+        <span>🔑 GitHub 设置 (自动读取缓存)</span>
+        <div class="config-inputs">
+            <input type="text" id="ghOwner" placeholder="GitHub用户名">
+            <input type="text" id="ghRepo" placeholder="仓库名">
+            <input type="password" id="ghToken" placeholder="Token">
+            <button class="btn btn-primary" onclick="saveConfig()">保存</button>
         </div>
-        <small style="color:#666">这些信息只保存在你的电脑浏览器里。</small>
     </div>
 
-    <div class="add-form">
-        <div class="form-group"><label>ID</label><input type="text" id="newId" placeholder="cup-001"></div>
-        <div class="form-group"><label>名称</label><input type="text" id="newName" placeholder="新产品"></div>
-        <div class="form-group"><label>价格</label><input type="number" id="newPrice" placeholder="25.00"></div>
-        <div class="form-group"><label>图片</label><input type="text" id="newImg" value="product_images/"></div>
-        <button class="btn btn-add" onclick="addNewProduct()">+ 添加</button>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('products')">📦 产品管理</button>
+        <button class="tab-btn" onclick="switchTab('customers')">👥 客户与订单</button>
     </div>
 
-    <div class="toolbar">
-        <input type="text" class="search-box" id="searchInput" placeholder="搜索产品..." onkeyup="renderTable()">
+    <div id="tab-products" class="tab-content active">
+        <div class="toolbar">
+            <input type="text" id="prodSearch" class="search-box" placeholder="🔍 搜索产品..." onkeyup="renderProducts()">
+            <button class="btn btn-primary" onclick="addNewProduct()">+ 新产品</button>
+        </div>
+        <table>
+            <thead><tr><th>状态</th><th>ID</th><th>图</th><th>名称</th><th>价格</th><th>操作</th></tr></thead>
+            <tbody id="prodBody"></tbody>
+        </table>
+        <button id="btnSaveProd" class="btn btn-success btn-save-cloud" onclick="saveToGithub('products')">💾 保存【产品列表】到 GitHub</button>
     </div>
 
-    <table>
-        <thead>
-            <tr><th>状态</th><th>ID</th><th>图片</th><th>名称</th><th>价格</th><th>操作</th></tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-
-    <button id="saveBtn" class="btn btn-save" onclick="saveToGithub()">💾 保存并发布到 GitHub</button>
-    <p id="statusMsg" style="text-align: center; margin-top: 10px; color: #666;"></p>
+    <div id="tab-customers" class="tab-content">
+        <div class="toolbar">
+            <input type="text" id="custSearch" class="search-box" placeholder="🔍 搜索客户名字或电话..." onkeyup="renderCustomers()">
+            <button class="btn btn-primary" onclick="addNewCustomer()">+ 新客户</button>
+        </div>
+        <table>
+            <thead><tr><th>姓名</th><th>电话 (WhatsApp)</th><th>备注</th><th>历史订单</th><th>操作</th></tr></thead>
+            <tbody id="custBody"></tbody>
+        </table>
+        <button id="btnSaveCust" class="btn btn-success btn-save-cloud" onclick="saveToGithub('customers')">💾 保存【客户列表】到 GitHub</button>
+    </div>
+    
+    <p id="statusMsg" style="text-align: center; margin-top: 15px; color: #666;"></p>
 </div>
 
 <script src="products.js"></script>
+<script src="customers.js"></script>
 
 <script>
-    // 初始化数据
-    let currentData = (typeof allProducts !== 'undefined') ? allProducts : [];
-    
-    // 页面加载时，从本地缓存读取 GitHub 配置
+    // --- 1. 初始化与配置 ---
+    let productList = (typeof allProducts !== 'undefined') ? allProducts : [];
+    let customerList = (typeof allCustomers !== 'undefined') ? allCustomers : [];
+
     window.onload = function() {
         document.getElementById('ghOwner').value = localStorage.getItem('gh_owner') || '';
         document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
         document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
-        renderTable();
+        renderProducts();
+        renderCustomers();
     };
 
     function saveConfig() {
@@ -94,109 +115,173 @@
         alert("配置已保存！");
     }
 
-    // 渲染表格 (保持不变)
-    function renderTable() {
-        const tbody = document.getElementById('tableBody');
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        tbody.innerHTML = '';
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        event.target.classList.add('active');
+        document.getElementById('tab-' + tabName).classList.add('active');
+    }
 
-        currentData.forEach((item, index) => {
-            if (!item.name.toLowerCase().includes(searchTerm) && !item.id.toLowerCase().includes(searchTerm)) return;
-            const statusClass = item.active ? 'status-active' : 'status-inactive';
-            const statusText = item.active ? '上架' : '下架';
-            
+    // --- 2. 产品逻辑 ---
+    function renderProducts() {
+        const tbody = document.getElementById('prodBody');
+        const term = document.getElementById('prodSearch').value.toLowerCase();
+        tbody.innerHTML = '';
+        
+        productList.forEach((p, i) => {
+            if(!p.name.toLowerCase().includes(term)) return;
             tbody.innerHTML += `
                 <tr>
-                    <td><span class="status-badge ${statusClass}" onclick="toggleStatus(${index})">${statusText}</span></td>
-                    <td>${item.id}</td>
-                    <td><img src="${item.image}" style="height:30px;"></td>
-                    <td contenteditable="true" onblur="updateName(${index}, this.innerText)">${item.name}</td>
-                    <td contenteditable="true" onblur="updatePrice(${index}, this.innerText)">$${item.price}</td>
-                    <td><button onclick="deleteProduct(${index})" style="color:red;border:none;background:none;cursor:pointer">删除</button></td>
+                    <td><span class="badge ${p.active?'active-badge':'inactive-badge'}" onclick="toggleProd(${i})">${p.active?'上架':'下架'}</span></td>
+                    <td contenteditable="true" onblur="updateProd(${i}, 'id', this.innerText)">${p.id}</td>
+                    <td><img src="${p.image}" style="height:30px"></td>
+                    <td contenteditable="true" onblur="updateProd(${i}, 'name', this.innerText)">${p.name}</td>
+                    <td contenteditable="true" onblur="updateProd(${i}, 'price', this.innerText)">${p.price}</td>
+                    <td><button class="btn btn-danger" onclick="delProd(${i})">删</button></td>
                 </tr>`;
         });
     }
-
-    function toggleStatus(i) { currentData[i].active = !currentData[i].active; renderTable(); }
-    function updateName(i, v) { currentData[i].name = v; }
-    function updatePrice(i, v) { currentData[i].price = parseFloat(v.replace('$','')); }
-    function deleteProduct(i) { if(confirm("确定删除？")) { currentData.splice(i, 1); renderTable(); } }
     
     function addNewProduct() {
-        currentData.push({
-            id: document.getElementById('newId').value,
-            name: document.getElementById('newName').value,
-            price: parseFloat(document.getElementById('newPrice').value),
-            image: document.getElementById('newImg').value,
-            active: true
+        productList.push({ id: "new-"+Date.now(), name: "新产品", price: 0, image: "product_images/cup.jpg", active: false });
+        renderProducts();
+    }
+    function updateProd(i, key, val) { productList[i][key] = (key==='price') ? parseFloat(val) : val; }
+    function toggleProd(i) { productList[i].active = !productList[i].active; renderProducts(); }
+    function delProd(i) { if(confirm("删除?")) { productList.splice(i,1); renderProducts(); } }
+
+
+    // --- 3. 客户逻辑 (CRM核心) ---
+    function renderCustomers() {
+        const tbody = document.getElementById('custBody');
+        const term = document.getElementById('custSearch').value.toLowerCase();
+        tbody.innerHTML = '';
+
+        customerList.forEach((c, i) => {
+            if(!c.name.toLowerCase().includes(term) && !c.phone.includes(term)) return;
+            
+            // 计算总消费
+            let totalSpent = c.history ? c.history.reduce((sum, h) => sum + (h.amount||0), 0) : 0;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td contenteditable="true" onblur="updateCust(${i}, 'name', this.innerText)">${c.name}</td>
+                    <td>
+                        <span contenteditable="true" onblur="updateCust(${i}, 'phone', this.innerText)">${c.phone}</span>
+                        <a href="https://wa.me/${c.phone}" target="_blank" class="btn-whatsapp">📲 Chat</a>
+                    </td>
+                    <td contenteditable="true" onblur="updateCust(${i}, 'notes', this.innerText)">${c.notes || ''}</td>
+                    <td>
+                        <button class="btn" onclick="toggleHistory(${i})">📜 订单(${c.history?c.history.length:0})</button>
+                        <button class="btn btn-primary" style="padding:4px 8px;font-size:0.8rem" onclick="addOrder(${i})">+ 记单</button>
+                    </td>
+                    <td><button class="btn btn-danger" onclick="delCust(${i})">删</button></td>
+                </tr>
+                <tr id="hist-row-${i}" class="history-row">
+                    <td colspan="5">
+                        <div class="history-box">
+                            <strong>🛒 购买历史 (总消费: $${totalSpent})</strong>
+                            ${c.history && c.history.length > 0 ? c.history.map(h => `
+                                <div class="history-item">
+                                    <span>📅 ${h.date} | 📄 ${h.invoice}</span>
+                                    <span>${h.items} | <strong>$${h.amount}</strong></span>
+                                </div>
+                            `).join('') : '<p>暂无记录</p>'}
+                        </div>
+                    </td>
+                </tr>
+            `;
         });
-        renderTable();
-        alert("已添加，记得点底部保存按钮！");
     }
 
-    // --- 核心：调用 GitHub API ---
-    async function saveToGithub() {
+    function addNewCustomer() {
+        customerList.push({ id: "cust-"+Date.now(), name: "新客户", phone: "60", notes: "", history: [] });
+        renderCustomers();
+    }
+    function updateCust(i, key, val) { customerList[i][key] = val; }
+    function delCust(i) { if(confirm("删除此客户?")) { customerList.splice(i,1); renderCustomers(); } }
+    
+    function toggleHistory(i) {
+        const row = document.getElementById(`hist-row-${i}`);
+        row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
+    }
+
+    // 手动添加订单 (CRM功能)
+    function addOrder(i) {
+        const amount = prompt("请输入订单金额 ($):", "25");
+        if(amount === null) return;
+        const items = prompt("买了什么产品?", "咖啡杯");
+        
+        if(!customerList[i].history) customerList[i].history = [];
+        
+        customerList[i].history.unshift({
+            date: new Date().toISOString().split('T')[0],
+            invoice: "INV-" + Math.floor(Math.random()*10000),
+            items: items || "未知商品",
+            amount: parseFloat(amount)
+        });
+        renderCustomers();
+        // 自动展开历史记录
+        document.getElementById(`hist-row-${i}`).style.display = 'table-row';
+    }
+
+
+    // --- 4. 核心：保存到 GitHub ---
+    async function saveToGithub(type) {
         const owner = document.getElementById('ghOwner').value;
         const repo = document.getElementById('ghRepo').value;
         const token = document.getElementById('ghToken').value;
-        const path = "products.js"; // 我们要修改的文件名
 
-        if(!owner || !repo || !token) return alert("请先填写顶部的 GitHub 配置！");
+        if(!owner || !repo || !token) return alert("请先在顶部填写 GitHub 配置！");
 
-        const btn = document.getElementById('saveBtn');
+        // 根据类型决定存哪个文件
+        const fileName = (type === 'products') ? 'products.js' : 'customers.js';
+        const dataToSave = (type === 'products') ? productList : customerList;
+        const variableName = (type === 'products') ? 'allProducts' : 'allCustomers';
+        const extraCode = (type === 'products') ? '\n\nconst products = allProducts.filter(p => p.active === true);' : '';
+
+        const btn = document.getElementById(type === 'products' ? 'btnSaveProd' : 'btnSaveCust');
         const msg = document.getElementById('statusMsg');
+        const originalText = btn.innerText;
         
         btn.disabled = true;
         btn.innerText = "正在连接 GitHub...";
-        msg.innerText = "步骤 1/2: 获取文件信息...";
 
         try {
-            // 1. 先获取文件的 SHA (GitHub 修改文件必须提供上一个版本的 SHA)
-            const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-            const getRes = await fetch(getUrl, {
-                headers: { "Authorization": `token ${token}` }
-            });
+            // 1. 获取 SHA
+            const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
+            const getRes = await fetch(getUrl, { headers: { "Authorization": `token ${token}` } });
+            if(!getRes.ok) throw new Error("文件不存在或Token错误");
             const getJson = await getRes.json();
-            const sha = getJson.sha;
 
-            msg.innerText = "步骤 2/2: 上传新代码...";
-
-            // 2. 准备新内容
-            const jsonString = JSON.stringify(currentData, null, 4);
-            const newContent = `// 这是你的“总数据库”，包含所有（上架和下架）的产品\n// 以后请把 admin.html 生成的代码粘贴覆盖这里\nconst allProducts = ${jsonString};\n\n// 这一行代码只“过滤”出 active: true 的产品给 index.html 使用\nconst products = allProducts.filter(p => p.active === true);`;
-
-            // GitHub API 要求内容必须是 Base64 编码，并且要处理中文编码问题
+            // 2. 准备内容
+            const jsonString = JSON.stringify(dataToSave, null, 4);
+            const newContent = `// 这是你的“${type==='products'?'总数据库':'客户数据库'}”\n// 以后 admin.html 会自动修改这个文件\nconst ${variableName} = ${jsonString};${extraCode}`;
             const contentEncoded = btoa(unescape(encodeURIComponent(newContent)));
 
-            // 3. 发送 PUT 请求更新文件
+            // 3. 上传
             const putRes = await fetch(getUrl, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Content-Type": "application/json"
-                },
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    message: "Update products from Admin Panel", // 提交信息
+                    message: `Update ${fileName} via Admin Panel`,
                     content: contentEncoded,
-                    sha: sha // 必须带上这个
+                    sha: getJson.sha
                 })
             });
 
             if (putRes.ok) {
-                alert("🎉 成功！GitHub 已更新，Netlify 正在重新发布！\n请等待约 30 秒后刷新网店。");
-                msg.innerText = "✅ 更新成功！";
+                alert(`✅ ${fileName} 更新成功！Netlify 将自动备份。`);
+                msg.innerText = "上次保存成功: " + new Date().toLocaleTimeString();
             } else {
-                throw new Error("GitHub 拒绝了请求");
+                throw new Error("保存失败");
             }
-
         } catch (err) {
-            console.error(err);
-            alert("❌ 失败了！请检查：\n1. 用户名/仓库名对不对？\n2. Token 复制对了吗？\n3. Token 是否过期？");
-            msg.innerText = "❌ 发生错误";
+            alert("❌ 错误: " + err.message);
         }
-
         btn.disabled = false;
-        btn.innerText = "💾 保存并发布到 GitHub";
+        btn.innerText = originalText;
     }
 </script>
 
