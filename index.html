@@ -5,208 +5,316 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的极简商店</title>
     <style>
-        /* 保持之前的极简样式 */
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; color: #333; background-color: #f9f9f9; }
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.5rem; font-weight: bold; }
-        .cart-icon { cursor: pointer; padding: 8px 15px; background: #333; color: white; border-radius: 20px; font-size: 0.9rem; }
-        .hero { text-align: center; padding: 80px 20px; background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1200&q=80'); background-size: cover; color: white; position: relative; }
-        .hero::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); }
-        .hero-content { position: relative; z-index: 1; }
-        .hero h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333; }
         
-        .container { max-width: 1000px; margin: 60px auto; padding: 0 20px; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; padding-bottom: 20px; }
+        /* 导航栏 */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 50; }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .user-status { font-size: 0.9rem; color: #666; }
+        .cart-icon { cursor: pointer; padding: 8px 15px; background: #333; color: white; border-radius: 20px; font-size: 0.9rem; position: relative; }
+        .cart-badge { background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; position: absolute; top: -5px; right: -5px; }
+
+        /* 产品列表 */
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; padding-bottom: 20px; transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); }
         .product-img { width: 100%; height: 250px; object-fit: cover; }
-        .product-title { margin: 15px 0 5px; font-weight: bold; }
-        .product-price { color: #888; display: block; margin-bottom: 15px; }
-        .add-btn { background: #333; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
+        .product-info { padding: 15px; }
+        .add-btn { background: #333; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; }
         .add-btn:hover { background: #555; }
 
-        /* 弹窗样式 */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content { background-color: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; text-align: left; }
-        .cart-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
-        .total-section { text-align: right; font-weight: bold; margin-top: 20px; font-size: 1.2rem; }
-        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
-        .action-btn { flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-align: center; }
-        .btn-pay { background: #25D366; color: white; } /* WhatsApp Green */
-        .btn-close { background: #eee; color: #333; }
-        
-        .qr-area { text-align: center; margin-top: 20px; display: none; }
-        .qr-img { width: 200px; height: 200px; object-fit: contain; border: 1px dashed #ccc; margin-bottom: 10px; }
-        
-        input { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        /* 通用模态框 (Modal) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-content { background-color: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .close-btn { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #999; }
+
+        /* 登录/注册表单样式 */
+        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #eee; }
+        .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: #999; font-weight: bold; }
+        .auth-tab.active { color: #333; border-bottom: 2px solid #333; }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; color: #666; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-submit { width: 100%; padding: 12px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px; }
+        .btn-whatsapp { background: #25D366; }
+
+        /* 购物车列表 */
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-    <form name="orders" netlify hidden>
-        <input type="text" name="order_id" />
-        <input type="text" name="customer_name" />
-        <input type="text" name="total_price" />
-        <textarea name="items"></textarea>
+    <form name="registrations" netlify hidden>
+        <input type="text" name="name" />
+        <input type="text" name="phone" />
+        <input type="text" name="country" />
+        <input type="text" name="password" />
     </form>
 
     <nav>
         <div class="logo">MyShop.</div>
-        <div class="cart-icon" onclick="openCart()">
-            🛒 <span id="cartCount">0</span>
+        <div class="nav-right">
+            <span id="welcomeMsg" class="user-status" onclick="logout()"></span>
+            <div class="cart-icon" onclick="openCart()">
+                🛒 <span id="cartCount" class="cart-badge">0</span>
+            </div>
         </div>
     </nav>
-
-    <header class="hero">
-        <div class="hero-content">
-            <h1>精选好物</h1>
-            <p>简约生活，从这里开始</p>
-        </div>
-    </header>
 
     <div class="container">
         <div class="product-grid" id="productContainer">
             </div>
     </div>
 
-    <div id="cartModal" class="modal">
+    <div id="authModal" class="modal">
         <div class="modal-content">
-            <h2>购物车</h2>
-            <div id="cartList"></div>
-            <div class="total-section">总计: $<span id="totalPrice">0</span></div>
-
-            <div id="customerForm">
-                <input type="text" id="custName" placeholder="您的名字 (用于核对订单)" />
+            <span class="close-btn" onclick="closeAuth()">&times;</span>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuth('login')">登录</div>
+                <div class="auth-tab" onclick="switchAuth('register')">注册新会员</div>
             </div>
 
-            <div class="qr-area" id="qrArea">
-                <p>订单号: <strong id="invoiceId"></strong></p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ReplaceWithYourBankQR" class="qr-img">
-                <p style="font-size: 0.8rem; color: #666;">请扫码支付，然后点击下方按钮通知我。</p>
+            <div id="form-login" class="auth-form active">
+                <div class="form-group">
+                    <label>电话号码</label>
+                    <input type="text" id="loginPhone" placeholder="请输入注册时的手机号">
+                </div>
+                <button class="btn-submit" onclick="handleLogin()">登录</button>
             </div>
 
-            <div class="btn-group">
-                <button class="action-btn btn-close" onclick="closeCart()">关闭</button>
-                <button class="action-btn btn-pay" id="mainBtn" onclick="handleCheckout()">去买单</button>
+            <div id="form-register" class="auth-form">
+                <div class="form-group">
+                    <label>姓名 (真实姓名)</label>
+                    <input type="text" id="regName" placeholder="例如: John Doe">
+                </div>
+                <div class="form-group">
+                    <label>国家/地区</label>
+                    <select id="regCountry">
+                        <option value="+60">🇲🇾 马来西亚 (+60)</option>
+                        <option value="+65">🇸🇬 新加坡 (+65)</option>
+                        <option value="+86">🇨🇳 中国 (+86)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>电话号码</label>
+                    <input type="text" id="regPhone" placeholder="例如: 123456789">
+                </div>
+                <div class="form-group">
+                    <label>设置密码 (用于积分查询)</label>
+                    <input type="password" id="regPass" placeholder="******">
+                </div>
+                <button class="btn-submit" onclick="handleRegister()">创建账户</button>
             </div>
         </div>
     </div>
 
-    <script src="products.js"></script>
-    
-    <script>
-        // 渲染产品列表
-        const container = document.getElementById('productContainer');
-        products.forEach(p => {
-            container.innerHTML += `
-                <div class="product-card">
-                    <img src="${p.image}" class="product-img">
-                    <div class="product-title">${p.name}</div>
-                    <span class="product-price">$${p.price}</span>
-                    <button class="add-btn" onclick="addToCart('${p.id}')">加入购物车</button>
-                </div>
-            `;
-        });
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <h2>我的购物车</h2>
+            <div id="cartList" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;"></div>
+            <div style="text-align: right; font-weight: bold; font-size: 1.2rem; margin-bottom: 20px;">
+                总计: $<span id="totalPrice">0</span>
+            </div>
+            
+            <div id="paymentArea" style="display:none; text-align:center;">
+                <p>订单号: <strong id="invoiceId"></strong></p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ExampleBankQR" style="margin:10px auto;">
+                <p style="font-size:0.8rem; color:#666;">请扫码支付，然后点击下方发送回执。</p>
+            </div>
 
-        // 购物车逻辑
+            <button id="checkoutBtn" class="btn-submit btn-whatsapp" onclick="handleCheckout()">去结账 (WhatsApp)</button>
+        </div>
+    </div>
+
+    <script src="products.js"></script>
+
+    <script>
         let cart = [];
-        
+        let currentUser = null; // 存储当前登录的用户信息 {name, phone, country}
+
+        // --- 初始化: 检查是否已登录 ---
+        window.onload = function() {
+            renderProducts();
+            const savedUser = localStorage.getItem('myshop_user');
+            if(savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUserUI();
+            }
+        };
+
+        function renderProducts() {
+            const container = document.getElementById('productContainer');
+            // 只显示 active 的产品 (防止 products 未定义)
+            const list = (typeof products !== 'undefined') ? products : [];
+            container.innerHTML = '';
+            list.forEach(p => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${p.image}" class="product-img">
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <span style="color:#888; display:block; margin-bottom:5px;">$${p.price}</span>
+                            <button class="add-btn" onclick="addToCart('${p.id}')">加入购物车</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // --- 登录/注册 逻辑 ---
+        function checkLogin() {
+            if(!currentUser) {
+                document.getElementById('authModal').style.display = 'flex';
+                return false;
+            }
+            return true;
+        }
+
+        function switchAuth(type) {
+            document.querySelectorAll('.auth-tab').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(e => e.classList.remove('active'));
+            
+            if(type === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('form-login').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('form-register').classList.add('active');
+            }
+        }
+
+        function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
+
+        function handleRegister() {
+            const name = document.getElementById('regName').value;
+            const country = document.getElementById('regCountry').value;
+            const phone = document.getElementById('regPhone').value;
+            const pass = document.getElementById('regPass').value;
+
+            if(!name || !phone || !pass) return alert("请填写完整资料");
+
+            // 1. 保存到本地 (模拟登录成功)
+            currentUser = { name, country, phone };
+            localStorage.setItem('myshop_user', JSON.stringify(currentUser));
+
+            // 2. 发送数据给 Netlify Form (Admin后台可见)
+            const formData = new FormData();
+            formData.append("form-name", "registrations");
+            formData.append("name", name);
+            formData.append("country", country);
+            formData.append("phone", phone);
+            formData.append("password", pass);
+            
+            fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(formData).toString() })
+                .then(() => console.log("Registered to Netlify"));
+
+            alert("注册成功！欢迎, " + name);
+            updateUserUI();
+            closeAuth();
+        }
+
+        function handleLogin() {
+            const phone = document.getElementById('loginPhone').value;
+            if(!phone) return alert("请输入电话");
+
+            // 简单模拟: 只要输入了电话就算登录 (实际项目需要验证)
+            // 这里为了演示，我们假设用户存在
+            currentUser = { name: "老顾客", phone: phone, country: "+60" };
+            localStorage.setItem('myshop_user', JSON.stringify(currentUser));
+            
+            updateUserUI();
+            closeAuth();
+        }
+
+        function logout() {
+            if(confirm("确定要退出吗？")) {
+                localStorage.removeItem('myshop_user');
+                currentUser = null;
+                updateUserUI();
+            }
+        }
+
+        function updateUserUI() {
+            const msg = document.getElementById('welcomeMsg');
+            if(currentUser) {
+                msg.innerHTML = `👋 Hi, ${currentUser.name} (退出)`;
+                msg.style.cursor = "pointer";
+            } else {
+                msg.innerHTML = "";
+            }
+        }
+
+        // --- 购物车逻辑 ---
         function addToCart(id) {
+            // 关键：点击加入购物车时，强制检查登录
+            if(!checkLogin()) return;
+
             const product = products.find(p => p.id === id);
             cart.push(product);
-            updateCartUI();
-            alert(`${product.name} 已加入!`);
+            updateCartCount();
+            alert("已加入购物车");
         }
 
-        function updateCartUI() {
-            document.getElementById('cartCount').innerText = cart.length;
-        }
+        function updateCartCount() { document.getElementById('cartCount').innerText = cart.length; }
 
         function openCart() {
+            if(!checkLogin()) return; // 打开购物车也要检查
+            
             const list = document.getElementById('cartList');
             list.innerHTML = '';
             let total = 0;
-            
-            if(cart.length === 0) {
-                list.innerHTML = '<p>购物车是空的</p>';
-            } else {
-                cart.forEach((item, index) => {
-                    total += item.price;
-                    list.innerHTML += `
-                        <div class="cart-item">
-                            <span>${item.name}</span>
-                            <span>$${item.price} <small onclick="removeItem(${index})" style="color:red;cursor:pointer;">[x]</small></span>
-                        </div>
-                    `;
-                });
-            }
+            if(cart.length === 0) list.innerHTML = "<p>购物车是空的</p>";
+            cart.forEach((item, index) => {
+                total += item.price;
+                list.innerHTML += `
+                    <div class="cart-item">
+                        <span>${item.name}</span>
+                        <span>$${item.price} <small style="color:red;cursor:pointer" onclick="removeItem(${index})">[x]</small></span>
+                    </div>`;
+            });
             document.getElementById('totalPrice').innerText = total;
             document.getElementById('cartModal').style.display = 'flex';
         }
 
-        function removeItem(index) {
-            cart.splice(index, 1);
-            openCart(); // 重新渲染
-            updateCartUI();
-        }
+        function removeItem(i) { cart.splice(i, 1); openCart(); updateCartCount(); }
+        function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
 
-        function closeCart() {
-            document.getElementById('cartModal').style.display = 'none';
-            // 重置界面
-            document.getElementById('qrArea').style.display = 'none';
-            document.getElementById('customerForm').style.display = 'block';
-            document.getElementById('mainBtn').innerText = "去买单";
-            document.getElementById('mainBtn').onclick = handleCheckout;
-        }
-
-        // 核心流程：买单 -> 生成单号 -> 存Netlify -> 跳WhatsApp
+        // --- 结账逻辑 ---
         function handleCheckout() {
-            if(cart.length === 0) return alert('购物车是空的');
+            if(cart.length === 0) return;
+
+            const btn = document.getElementById('checkoutBtn');
+            const paymentArea = document.getElementById('paymentArea');
+            const total = document.getElementById('totalPrice').innerText;
+            const invoice = "INV-" + Date.now().toString().slice(-5);
+
+            // 第一步: 显示二维码
+            if(paymentArea.style.display === 'none') {
+                document.getElementById('invoiceId').innerText = invoice;
+                paymentArea.style.display = 'block';
+                btn.innerText = "✅ 我已付款 (发送WhatsApp通知)";
+                return;
+            }
+
+            // 第二步: 跳转WhatsApp
+            const itemsText = cart.map(i => i.name).join(", ");
+            // 组合消息: 包含顾客资料 (方便Admin录入)
+            const msg = `*新订单!* %0A----------------%0A👤 客户: ${currentUser.name}%0A📞 电话: ${currentUser.country} ${currentUser.phone}%0A🧾 单号: ${invoice}%0A💰 总额: $${total}%0A📦 商品: ${itemsText}%0A----------------%0A我已经完成付款，请查收！`;
             
-            const name = document.getElementById('custName').value;
-            if(!name) return alert('请先输入您的名字');
-
-            // 1. 生成单号
-            const invoice = "INV-" + Date.now().toString().slice(-6);
-            document.getElementById('invoiceId').innerText = invoice;
-
-            // 2. 切换界面显示二维码
-            document.getElementById('customerForm').style.display = 'none';
-            document.getElementById('qrArea').style.display = 'block';
-            document.getElementById('mainBtn').innerText = "✅ 我已支付 (发送回执)";
+            window.open(`https://wa.me/60123456789?text=${msg}`, '_blank'); // ⚠️ 记得改你的电话
             
-            // 3. 准备数据发送给 Netlify 和 WhatsApp
-            document.getElementById('mainBtn').onclick = () => finishOrder(name, invoice);
-        }
-
-        function finishOrder(name, invoice) {
-            let total = 0;
-            let itemsText = cart.map(i => { total += i.price; return i.name; }).join(", ");
-
-            // --- A. 发送数据到 Netlify (后台备份) ---
-            // 创建一个表单数据对象
-            const formData = new FormData();
-            formData.append("form-name", "orders");
-            formData.append("order_id", invoice);
-            formData.append("customer_name", name);
-            formData.append("total_price", total);
-            formData.append("items", itemsText);
-
-            // 使用 fetch API 偷偷提交
-            fetch("/", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams(formData).toString()
-            }).then(() => console.log("Netlify Backup Success")).catch(e => console.error(e));
-
-            // --- B. 跳转 WhatsApp (主要交互) ---
-            const myPhone = "60167179854"; // ⚠️ 改成你的号码
-            const msg = `你好，我是 ${name}。%0A我已完成支付！🧾%0A%0A订单号: ${invoice}%0A总金额: $${total}%0A购买商品: ${itemsText}`;
-            window.open(`https://wa.me/${myPhone}?text=${msg}`, '_blank');
-            
-            // 清空购物车
+            // 清空
             cart = [];
-            updateCartUI();
+            updateCartCount();
             closeCart();
+            location.reload();
         }
     </script>
 </body>
