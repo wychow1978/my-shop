@@ -27,7 +27,7 @@ const allProducts = [
         "name": "小叮当杯",
         "price": 999.999,
         "image": "product_images/",
-        "active": true
+        "active": false
     }
 ];
 
