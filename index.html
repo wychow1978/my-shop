@@ -192,7 +192,7 @@
 
         function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
 
-        function handleRegister() {
+       async function handleRegister() {
             const name = document.getElementById('regName').value;
             const country = document.getElementById('regCountry').value;
             const phone = document.getElementById('regPhone').value;
@@ -200,24 +200,37 @@
 
             if(!name || !phone || !pass) return alert("请填写完整资料");
 
-            // 1. 保存到本地 (模拟登录成功)
-            currentUser = { name, country, phone };
-            localStorage.setItem('myshop_user', JSON.stringify(currentUser));
+            const btn = document.querySelector('#form-register .btn-submit');
+            const originalText = btn.innerText;
+            btn.innerText = "正在注册中...";
+            btn.disabled = true;
 
-            // 2. 发送数据给 Netlify Form (Admin后台可见)
-            const formData = new FormData();
-            formData.append("form-name", "registrations");
-            formData.append("name", name);
-            formData.append("country", country);
-            formData.append("phone", phone);
-            formData.append("password", pass);
-            
-            fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(formData).toString() })
-                .then(() => console.log("Registered to Netlify"));
+            try {
+                // 呼叫我们的 Netlify Function 机器人
+                const response = await fetch('/.netlify/functions/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, country, phone, password: pass })
+                });
 
-            alert("注册成功！欢迎, " + name);
-            updateUserUI();
-            closeAuth();
+                if (response.ok) {
+                    alert("🎉 注册成功！系统已自动记录。");
+                    
+                    // 自动登录
+                    currentUser = { name, country, phone };
+                    localStorage.setItem('myshop_user', JSON.stringify(currentUser));
+                    updateUserUI();
+                    closeAuth();
+                } else {
+                    alert("❌ 注册失败，请稍后再试。");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("网络错误");
+            }
+
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
 
         function handleLogin() {
