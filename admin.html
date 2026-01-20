@@ -3,94 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyShop 超级后台</title>
+    <title>MyShop 系统后台</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f0f2f5; color: #333; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        /* 基础样式 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f4f6f8; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
-        .config-box { background: #fff8e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #ffe082; display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; }
-        .config-inputs input { border: 1px solid #ccc; padding: 4px; border-radius: 4px; width: 150px; }
+        /* 顶部配置 */
+        .config-box { background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; flex-wrap: wrap; }
+        .config-inputs input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
 
-        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 20px; }
-        .tab-btn { padding: 15px 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; background: none; color: #888; border-bottom: 3px solid transparent; transition: 0.3s; }
+        /* 标签页 (Tabs) */
+        .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .tab-btn { padding: 12px 25px; font-size: 1rem; font-weight: 600; cursor: pointer; border: none; background: none; color: #718096; transition: 0.3s; border-bottom: 3px solid transparent; }
+        .tab-btn:hover { color: #3182ce; }
         .tab-btn.active { color: #3182ce; border-bottom: 3px solid #3182ce; }
-        .tab-content { display: none; animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 内容区域 */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* 表格与工具栏 */
         .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
         input.search-box { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.95rem; }
-        th { background: #f7fafc; padding: 12px; text-align: left; border-bottom: 2px solid #edf2f7; color: #4a5568; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
+        th { background: #edf2f7; padding: 12px; text-align: left; color: #4a5568; font-weight: 700; }
         td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        tr:hover { background: #f9fafb; }
-
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.9rem; }
+        
+        /* 按钮 */
+        .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
         .btn-primary { background: #3182ce; color: white; }
         .btn-success { background: #38a169; color: white; }
-        .btn-danger { color: #e53e3e; background: none; }
-        .btn-whatsapp { background: #25D366; color: white; text-decoration: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-save-cloud { width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 20px; }
-        
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
-        .active-badge { background: #c6f6d5; color: #22543d; }
-        .inactive-badge { background: #fed7d7; color: #822727; }
+        .btn-danger { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
+        .btn-whatsapp { background: #25D366; color: white; text-decoration: none; padding: 6px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-save-cloud { width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px; display: block; }
 
+        /* 客户详情卡片 */
+        .stats-badge { background: #ebf8ff; color: #2b6cb0; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 5px; }
         .history-row { background: #fafafa; display: none; }
-        .history-box { padding: 15px; margin: 10px 20px; border: 1px dashed #cbd5e0; border-radius: 6px; font-size: 0.9rem; }
-        .history-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 5px 0; }
+        .history-box { padding: 15px; margin: 10px; border: 1px dashed #cbd5e0; border-radius: 8px; }
+        .total-summary { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: #2d3748; }
+        
+        /* 新建客户模态框 */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+        .modal-box { background:white; padding:25px; border-radius:10px; width:400px; }
+        .form-group { margin-bottom:15px; }
+        .form-group label { display:block; margin-bottom:5px; font-weight:bold; }
+        .form-group input, .form-group select { width:100%; padding:8px; box-sizing:border-box; border:1px solid #ddd; border-radius:4px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="config-box">
-        <span>🔑 GitHub 设置</span>
-        <div class="config-inputs">
-            <input type="text" id="ghOwner" placeholder="GitHub用户名">
-            <input type="text" id="ghRepo" placeholder="仓库名">
-            <input type="password" id="ghToken" placeholder="Token">
-            <button class="btn btn-primary" onclick="saveConfig()">保存</button>
-        </div>
+        <span>🔗 GitHub 同步设置</span>
+        <input type="text" id="ghOwner" placeholder="用户名 (Owner)">
+        <input type="text" id="ghRepo" placeholder="仓库名 (Repo)">
+        <input type="password" id="ghToken" placeholder="Token (ghp_...)">
+        <button class="btn btn-primary" onclick="saveConfig()">保存配置</button>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('products')">📦 产品管理</button>
-        <button class="tab-btn" onclick="switchTab('customers')">👥 客户与订单</button>
+        <div class="tab-btn active" onclick="openTab('products')">📦 产品库</div>
+        <div class="tab-btn" onclick="openTab('customers')">👥 客户与订单</div>
     </div>
 
     <div id="tab-products" class="tab-content active">
         <div class="toolbar">
-            <input type="text" id="prodSearch" class="search-box" placeholder="🔍 搜索产品..." onkeyup="renderProducts()">
+            <input type="text" id="prodSearch" class="search-box" placeholder="搜索产品..." onkeyup="renderProducts()">
             <button class="btn btn-primary" onclick="addNewProduct()">+ 新产品</button>
         </div>
         <table>
-            <thead><tr><th>状态</th><th>ID</th><th>图</th><th>名称</th><th>价格</th><th>操作</th></tr></thead>
+            <thead><tr><th>状态</th><th>ID</th><th>图片</th><th>名称</th><th>价格</th><th>操作</th></tr></thead>
             <tbody id="prodBody"></tbody>
         </table>
-        <button id="btnSaveProd" class="btn btn-success btn-save-cloud" onclick="saveToGithub('products')">💾 保存【产品列表】到 GitHub</button>
+        <button class="btn btn-success btn-save-cloud" onclick="saveToGithub('products')">💾 保存产品列表到 GitHub</button>
     </div>
 
     <div id="tab-customers" class="tab-content">
         <div class="toolbar">
-            <input type="text" id="custSearch" class="search-box" placeholder="🔍 搜索客户..." onkeyup="renderCustomers()">
-            <button class="btn btn-primary" onclick="addNewCustomer()">+ 新客户</button>
+            <input type="text" id="custSearch" class="search-box" placeholder="搜索姓名或电话..." onkeyup="renderCustomers()">
+            <button class="btn btn-primary" onclick="openAddCustModal()">+ 录入新客户</button>
         </div>
         <table>
-            <thead><tr><th>姓名</th><th>电话 (WhatsApp)</th><th>备注</th><th>历史订单</th><th>操作</th></tr></thead>
+            <thead><tr><th>客户资料</th><th>统计数据</th><th>备注 (Admin)</th><th>操作</th></tr></thead>
             <tbody id="custBody"></tbody>
         </table>
-        <button id="btnSaveCust" class="btn btn-success btn-save-cloud" onclick="saveToGithub('customers')">💾 保存【客户列表】到 GitHub</button>
+        <button class="btn btn-success btn-save-cloud" onclick="saveToGithub('customers')">💾 保存客户列表到 GitHub</button>
     </div>
-    
-    <p id="statusMsg" style="text-align: center; margin-top: 15px; color: #666;"></p>
 </div>
+
+<div id="addCustModal" class="modal">
+    <div class="modal-box">
+        <h3>👤 录入新客户</h3>
+        <div class="form-group"><label>姓名</label><input type="text" id="newCName"></div>
+        <div class="form-group">
+            <label>国家/地区</label>
+            <select id="newCCode">
+                <option value="+60">🇲🇾 马来西亚 (+60)</option>
+                <option value="+65">🇸🇬 新加坡 (+65)</option>
+                <option value="+86">🇨🇳 中国 (+86)</option>
+            </select>
+        </div>
+        <div class="form-group"><label>电话号码</label><input type="text" id="newCPhone" placeholder="例如: 123456789"></div>
+        <div class="form-group"><label>初始密码</label><input type="text" id="newCPass" value="123456"></div>
+        <div class="form-group"><label>备注</label><input type="text" id="newCNotes"></div>
+        <div style="text-align:right; margin-top:20px;">
+            <button class="btn" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="confirmAddCust()">确定添加</button>
+        </div>
+    </div>
+</div>
+
+<p id="statusMsg" style="text-align: center; color: #666; margin-top:10px;"></p>
 
 <script src="products.js"></script>
 <script src="customers.js"></script>
 
 <script>
-    // 1. 初始化 (防止文件不存在时报错)
+    // --- 1. 初始化 ---
     let productList = (typeof allProducts !== 'undefined') ? allProducts : [];
     let customerList = (typeof allCustomers !== 'undefined') ? allCustomers : [];
 
@@ -109,14 +141,21 @@
         alert("配置已保存！");
     }
 
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        event.target.classList.add('active');
+    // --- Tab 切换逻辑 (修复版) ---
+    function openTab(tabName) {
+        // 隐藏所有内容
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        // 显示目标
         document.getElementById('tab-' + tabName).classList.add('active');
+        // 高亮按钮 (通过查找文本内容或者索引，这里简化处理)
+        const btns = document.querySelectorAll('.tab-btn');
+        if(tabName === 'products') btns[0].classList.add('active');
+        else btns[1].classList.add('active');
     }
 
-    // 2. 产品逻辑
+    // --- 2. 产品功能 (保持精简) ---
     function renderProducts() {
         const tbody = document.getElementById('prodBody');
         const term = document.getElementById('prodSearch').value.toLowerCase();
@@ -125,28 +164,177 @@
             if(!p.name.toLowerCase().includes(term)) return;
             tbody.innerHTML += `
                 <tr>
-                    <td><span class="badge ${p.active?'active-badge':'inactive-badge'}" onclick="toggleProd(${i})">${p.active?'上架':'下架'}</span></td>
-                    <td contenteditable="true" onblur="updateProd(${i}, 'id', this.innerText)">${p.id}</td>
+                    <td><span style="cursor:pointer; color:${p.active?'green':'red'}" onclick="toggleProd(${i})">${p.active?'● 上架':'○ 下架'}</span></td>
+                    <td contenteditable="true" onblur="updProd(${i},'id',this.innerText)">${p.id}</td>
                     <td><img src="${p.image}" style="height:30px"></td>
-                    <td contenteditable="true" onblur="updateProd(${i}, 'name', this.innerText)">${p.name}</td>
-                    <td contenteditable="true" onblur="updateProd(${i}, 'price', this.innerText)">${p.price}</td>
+                    <td contenteditable="true" onblur="updProd(${i},'name',this.innerText)">${p.name}</td>
+                    <td contenteditable="true" onblur="updProd(${i},'price',this.innerText)">${p.price}</td>
                     <td><button class="btn btn-danger" onclick="delProd(${i})">删</button></td>
                 </tr>`;
         });
     }
-    function addNewProduct() { productList.push({ id: "new-"+Date.now(), name: "新产品", price: 0, image: "product_images/cup.jpg", active: false }); renderProducts(); }
-    function updateProd(i, key, val) { productList[i][key] = (key==='price') ? parseFloat(val) : val; }
+    function updProd(i, k, v) { productList[i][k] = (k==='price')?parseFloat(v):v; }
     function toggleProd(i) { productList[i].active = !productList[i].active; renderProducts(); }
-    function delProd(i) { if(confirm("删除?")) { productList.splice(i,1); renderProducts(); } }
+    function delProd(i) { if(confirm("删除?")) productList.splice(i,1); renderProducts(); }
+    function addNewProduct() { productList.push({id:"new",name:"新产品",price:0,image:"",active:false}); renderProducts(); }
 
-    // 3. 客户逻辑
+    // --- 3. 客户功能 (核心升级) ---
     function renderCustomers() {
         const tbody = document.getElementById('custBody');
         const term = document.getElementById('custSearch').value.toLowerCase();
         tbody.innerHTML = '';
+
         customerList.forEach((c, i) => {
-            if(!c.name.toLowerCase().includes(term) && !c.phone.includes(term)) return;
-            let totalSpent = c.history ? c.history.reduce((sum, h) => sum + (h.amount||0), 0) : 0;
+            // 搜索过滤
+            const fullPhone = (c.country_code||"") + c.phone;
+            if(!c.name.toLowerCase().includes(term) && !fullPhone.includes(term)) return;
+
+            // 统计逻辑
+            const orderCount = c.history ? c.history.length : 0;
+            const totalSpent = c.history ? c.history.reduce((sum, h) => sum + (h.amount||0), 0) : 0;
+            const lastBuy = orderCount > 0 ? c.history[0].date : "无";
+
             tbody.innerHTML += `
                 <tr>
-                    <td contenteditable="
+                    <td>
+                        <div style="font-weight:bold; font-size:1rem;">${c.name}</div>
+                        <div style="color:#666; font-size:0.85rem;">
+                             ${c.country_code || '+60'} ${c.phone} 
+                             <a href="https://wa.me/${(c.country_code||'60').replace('+','')}${c.phone}" target="_blank" class="btn-whatsapp">📲</a>
+                        </div>
+                        <div style="font-size:0.8rem; color:#999;">密码: ${c.password||'未设'}</div>
+                    </td>
+                    <td>
+                        <span class="stats-badge">📦 ${orderCount} 单</span>
+                        <span class="stats-badge">💰 $${totalSpent}</span>
+                        <div style="font-size:0.8rem; margin-top:5px; color:#666;">最近: ${lastBuy}</div>
+                    </td>
+                    <td contenteditable="true" onblur="updCust(${i},'notes',this.innerText)" style="background:#fffef0; border:1px solid #eee;">${c.notes||''}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="toggleHistory(${i})">查看详情 / 记单</button>
+                        <button class="btn btn-danger" onclick="delCust(${i})" style="margin-left:5px;">🗑️</button>
+                    </td>
+                </tr>
+                <tr id="hist-row-${i}" class="history-row">
+                    <td colspan="4">
+                        <div class="history-box">
+                            <div class="total-summary">总消费: $${totalSpent} (共 ${orderCount} 次购买)</div>
+                            <button class="btn btn-primary" style="margin-bottom:10px;" onclick="addManualOrder(${i})">+ 手动添加新订单</button>
+                            <table style="background:white;">
+                                <thead><tr><th>日期</th><th>单号</th><th>产品</th><th>金额</th></tr></thead>
+                                <tbody>
+                                    ${c.history && c.history.length > 0 ? c.history.map(h => `
+                                        <tr>
+                                            <td>${h.date}</td>
+                                            <td>${h.invoice}</td>
+                                            <td>${h.items}</td>
+                                            <td><strong>$${h.amount}</strong></td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="4" style="text-align:center;color:#999;">暂无历史记录</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function updCust(i, k, v) { customerList[i][k] = v; }
+    function delCust(i) { if(confirm("确定删除此客户及所有历史数据?")) { customerList.splice(i,1); renderCustomers(); } }
+    function toggleHistory(i) { const el = document.getElementById(`hist-row-${i}`); el.style.display = el.style.display==='table-row'?'none':'table-row'; }
+
+    // 手动记单 (Admin帮你记)
+    function addManualOrder(i) {
+        const amount = prompt("金额 ($):");
+        if(!amount) return;
+        const items = prompt("购买了什么产品?");
+        const newOrder = {
+            date: new Date().toISOString().split('T')[0],
+            invoice: "MANUAL-" + Date.now().toString().slice(-4),
+            items: items || "线下订单",
+            amount: parseFloat(amount)
+        };
+        if(!customerList[i].history) customerList[i].history = [];
+        customerList[i].history.unshift(newOrder); // 加到最前面
+        renderCustomers();
+        // 保持展开状态
+        document.getElementById(`hist-row-${i}`).style.display = 'table-row';
+    }
+
+    // --- 弹窗相关 ---
+    function openAddCustModal() { document.getElementById('addCustModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('addCustModal').style.display = 'none'; }
+    
+    function confirmAddCust() {
+        const name = document.getElementById('newCName').value;
+        const code = document.getElementById('newCCode').value;
+        const phone = document.getElementById('newCPhone').value;
+        const pass = document.getElementById('newCPass').value;
+        const notes = document.getElementById('newCNotes').value;
+
+        if(!name || !phone) return alert("姓名和电话必填！");
+
+        customerList.push({
+            id: "cust-" + Date.now(),
+            name: name,
+            country_code: code,
+            phone: phone,
+            password: pass,
+            notes: notes,
+            history: []
+        });
+        
+        renderCustomers();
+        closeModal();
+        // 清空表单
+        document.getElementById('newCName').value = '';
+        document.getElementById('newCPhone').value = '';
+    }
+
+    // --- 4. 保存到 GitHub (核心) ---
+    async function saveToGithub(type) {
+        const owner = document.getElementById('ghOwner').value;
+        const repo = document.getElementById('ghRepo').value;
+        const token = document.getElementById('ghToken').value;
+        if(!owner || !repo || !token) return alert("请填写 GitHub 配置");
+
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ 连接中...";
+        btn.disabled = true;
+
+        const fileName = (type==='products') ? 'products.js' : 'customers.js';
+        const data = (type==='products') ? productList : customerList;
+        const varName = (type==='products') ? 'allProducts' : 'allCustomers';
+        const extra = (type==='products') ? '\nconst products = allProducts.filter(p => p.active === true);' : '';
+
+        try {
+            // 1. Get SHA
+            const getUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
+            const getRes = await fetch(getUrl, { headers: { "Authorization": `token ${token}` } });
+            const getJson = await getRes.json();
+            const sha = getRes.ok ? getJson.sha : null;
+
+            // 2. Upload
+            const content = `// ${type} Data\nconst ${varName} = ${JSON.stringify(data, null, 4)};${extra}`;
+            const encoded = btoa(unescape(encodeURIComponent(content))); // Fixed Chinese chars
+            
+            const putRes = await fetch(getUrl, {
+                method: "PUT",
+                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ message: `Update ${type}`, content: encoded, sha: sha })
+            });
+
+            if(putRes.ok) { alert("✅ 保存成功!"); } 
+            else { throw new Error("GitHub 拒绝请求"); }
+
+        } catch(e) { alert("❌ 失败: " + e.message); }
+        
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+</script>
+
+</body>
+</html>
